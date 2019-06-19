@@ -204,15 +204,33 @@ def dnn_error_ang_grad(x: np.ndarray, y, parameters):
                      pack_params((grad_W1, grad_W2, grad_W3, grad_b1, grad_b2, grad_b3))))
 
 
-def target_function(X, Y, parameters):
-    error_sum = sum(dnn_error_ang_grad(x, y, parameters)[0] for x, y in zip(X.T, Y))
-    gradient = dnn_error_ang_grad(X.T[0], Y[0], parameters)[1]
-    # return error_sum / X.shape[1], gradient
+def target_function(X, Y, parameters):  # useless?
+    error_sum = dnn_error_ang_grad(X.T, Y, parameters)[0]
+    gradient = dnn_error_ang_grad(X.T, Y, parameters)[1]
     return error_sum, gradient
 
 
 def get_target_f_of_params(X, Y):
     return lambda p: target_function(X=X, Y=Y, parameters=p)
+
+'''
+New code starts here
+'''
+
+
+def SGD(train_data, train_targets, params, learning_rate: float, num_epochs = 1000):
+    idx = np.random.randint(len(train_data), size=32)
+    batch_data = train_data[:, idx]
+    batch_data = np.transpose(batch_data)
+    batch_targets = train_targets[idx]
+
+    error, gradient = target_function(batch_data[0], batch_targets[0], params)
+
+    # ready_tests = ['W1', 'W2', 'W3']
+    # for test in ready_tests:
+    #     anal = analytic_calc_dir_grads_dnn_error(x, params, test)
+
+    print('CHECKPOINT, DELETE ME PLZ KTHNX')
 
 
 def main():
@@ -230,7 +248,7 @@ def main():
     ax.set_zlabel('$f(x_1, x_2)$')
     plt.title('$f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
 
-    plt.show(block=False)
+    plt.show()
 
     # generate train and test data
     Ntrain = 500
@@ -252,32 +270,34 @@ def main():
     params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
                          params['b2'], params['b3']))
 
-    learned_params, f_history = BFGS.BFGS(get_target_f_of_params(X_train, Y_train), params)
+    SGD(X_train, Y_train, params, 0.5)
+
+    # learned_params, f_history = BFGS.BFGS(get_target_f_of_params(X_train, Y_train), params)
 
     # Plotting the BFGS graph
-    f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
-    plt.figure(figsize=(8, 7))
-    plt.plot(f_history)
-    plt.semilogy()
-    plt.xlabel('Number of iterations')
-    plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
-    plt.grid()
-    plt.title('BFGS of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
-    plt.show(block=False)
-
-    W1, W2, W3, b1, b2, b3 = unpack_params(learned_params)
-    param_dict = {'W1': W1, 'W2': W2, 'W3': W3, 'b1': b1, 'b2': b2, 'b3': b3}
-    reconstructed = np.array(list(dnn_forward(x.reshape(-1, 1), param_dict)[0][0] for x in X_test.T))
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(X1, X2, Y, cmap=plt.cm.coolwarm, alpha=.6)
-    ax.set_xlabel('$x_1$')
-    ax.set_ylabel('$x_2$')
-    ax.set_zlabel('$F(x, W)$')
-    ax.scatter(X_test[:][0], X_test[:][1], reconstructed, c='g', alpha=.61)
-    plt.title('Predictions of trained DNN')
-    plt.show()
+    # f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
+    # plt.figure(figsize=(8, 7))
+    # plt.plot(f_history)
+    # plt.semilogy()
+    # plt.xlabel('Number of iterations')
+    # plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
+    # plt.grid()
+    # plt.title('BFGS of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
+    # plt.show(block=False)
+    #
+    # W1, W2, W3, b1, b2, b3 = unpack_params(learned_params)
+    # param_dict = {'W1': W1, 'W2': W2, 'W3': W3, 'b1': b1, 'b2': b2, 'b3': b3}
+    # reconstructed = np.array(list(dnn_forward(x.reshape(-1, 1), param_dict)[0][0] for x in X_test.T))
+    #
+    # fig = plt.figure(figsize=(10, 8))
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.plot_surface(X1, X2, Y, cmap=plt.cm.coolwarm, alpha=.6)
+    # ax.set_xlabel('$x_1$')
+    # ax.set_ylabel('$x_2$')
+    # ax.set_zlabel('$F(x, W)$')
+    # ax.scatter(X_test[:][0], X_test[:][1], reconstructed, c='g', alpha=.61)
+    # plt.title('Predictions of trained DNN')
+    # plt.show()
 
     print('success')
 
@@ -343,6 +363,6 @@ class task3_q_2 (unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # main()
-    unittest.main()
+    main()
+    # unittest.main()
 

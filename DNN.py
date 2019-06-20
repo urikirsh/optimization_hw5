@@ -101,19 +101,19 @@ def analytic_calc_dir_grads_dnn_error(x: np.ndarray, parameters: dict, direction
 def generate_bias(n: int, random=False):
     assert n > 0
     if random:
-        return np.random.rand(n, 1)
+        return np.random.rand(n, 1) / math.sqrt(n)
     return np.zeros((n, 1))
 
 
 def generate_weight(m: int, n: int):
     assert m > 0
     assert n > 0
-    return np.random.rand(m, n) / math. sqrt(n)
+    return np.random.rand(m, n) / math.sqrt(m * n)
 
 
 def generate_params(random=True):
     '''
-    Generate weights and biases for a DNN
+    Generate weights and biases for a DNN vie Xavier initialization
     :param random: If true returns random biases, if false biases are initialized as zeros
     :return: A dictionary of 3 weights and 3 biases
     '''

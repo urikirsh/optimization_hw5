@@ -218,19 +218,31 @@ New code starts here
 '''
 
 
-def SGD(train_data, train_targets, params, learning_rate: float, num_epochs = 1000):
-    idx = np.random.randint(len(train_data), size=32)
+def SGD(train_data, train_targets, params, learning_rate: float, num_epochs = 1000,
+        batch_size=32):
+    idx = np.random.randint(len(train_data), size=batch_size)
     batch_data = train_data[:, idx]
     batch_data = np.transpose(batch_data)
     batch_targets = train_targets[idx]
 
-    error, gradient = target_function(batch_data[0], batch_targets[0], params)
+    error_history = []
 
-    # ready_tests = ['W1', 'W2', 'W3']
-    # for test in ready_tests:
-    #     anal = analytic_calc_dir_grads_dnn_error(x, params, test)
+    for epoch in range(num_epochs):
+        batch_grads = []
+        batch_errors = []
+        for i in range(batch_size):
+            curr_error, curr_gradient = \
+                target_function(batch_data[i], batch_targets[i], params)
+            batch_grads.append(curr_gradient)
+            batch_errors.append(curr_error)
 
-    print('CHECKPOINT, DELETE ME PLZ KTHNX')
+        mean_err = np.mean(batch_errors, axis=0)
+        error_history.append(mean_err)
+
+        mean_grad = np.mean(batch_grads, axis=0)
+        params -= learning_rate * mean_grad
+
+    return params, error_history
 
 
 def main():
@@ -248,7 +260,7 @@ def main():
     ax.set_zlabel('$f(x_1, x_2)$')
     plt.title('$f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
 
-    plt.show()
+    plt.show(block=False)
 
     # generate train and test data
     Ntrain = 500
@@ -270,20 +282,20 @@ def main():
     params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
                          params['b2'], params['b3']))
 
-    SGD(X_train, Y_train, params, 0.5)
+    learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
 
     # learned_params, f_history = BFGS.BFGS(get_target_f_of_params(X_train, Y_train), params)
 
-    # Plotting the BFGS graph
-    # f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
-    # plt.figure(figsize=(8, 7))
-    # plt.plot(f_history)
-    # plt.semilogy()
-    # plt.xlabel('Number of iterations')
-    # plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
-    # plt.grid()
-    # plt.title('BFGS of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
-    # plt.show(block=False)
+    # Plotting error graph
+    f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
+    plt.figure(figsize=(8, 7))
+    plt.plot(f_history)
+    plt.semilogy()
+    plt.xlabel('Number of iterations')
+    plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
+    plt.grid()
+    plt.title('SGD of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
+    plt.show()
     #
     # W1, W2, W3, b1, b2, b3 = unpack_params(learned_params)
     # param_dict = {'W1': W1, 'W2': W2, 'W3': W3, 'b1': b1, 'b2': b2, 'b3': b3}

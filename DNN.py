@@ -108,7 +108,7 @@ def generate_bias(n: int, random=False):
 def generate_weight(m: int, n: int):
     assert m > 0
     assert n > 0
-    return np.random.rand(m, n) / math.sqrt(m * n)
+    return np.random.randn(m, n) / math.sqrt(m * n)
 
 
 def generate_params(random=True):

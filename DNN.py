@@ -231,9 +231,8 @@ def SGD(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
         num_epochs=100, batch_size=32):
     idx = np.random.randint(len(train_data), size=batch_size)
     batch_data = train_data[:, idx]
-    batch_data = np.transpose(batch_data)
     batch_targets = train_targets[idx]
-
+    batch_data = np.transpose(batch_data)
     error_history = []
 
     for epoch in range(num_epochs):
@@ -290,6 +289,14 @@ def AdaGrad(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
     return params, error_history
 
 
+def eval_test_set(X_test, Y_test, params):
+    losses = []
+    X_test = np.transpose(X_test)
+    for i in range(len(X_test)):
+        losses.append(target_function(X_test[i], Y_test[i], params)[0])
+    return np.mean(losses)
+
+
 def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test):
     init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
     decay_rates = np.logspace(0, -7, 8, endpoint=True)
@@ -300,18 +307,20 @@ def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, 
         for decay in decay_rates:
             learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
                                                   init, decay_rate=decay)
-            train_error = f_history[-1][0][0]
+            train_loss = f_history[-1][0][0]
+
+            test_loss = eval_test_set(X_test, Y_test, learned_params)
             print("Using", alg_name, "with initial learning rate", init,
                   "and learning decay rate", decay, "on training set, loss is",
-                  train_error)
+                  train_loss)
             curr_res = pd.DataFrame.from_dict({"Algorithm": [alg_name],
-                                               "Data set": ['train'],
                                                "Initial learning rate": [init],
                                                "Learning decay rate": [decay],
-                                               "Loss": [train_error]})
-            pd.concat([results, curr_res])
+                                               "Train loss": [train_loss],
+                                               "Test loss": [test_loss]})
+            results = pd.concat([results, curr_res])
     print('checkpoint')
-    #TODO: test set
+    return results
 
 
 def main():
@@ -347,12 +356,13 @@ def main():
     for i in range(0, Ntest):
         Y_test[i] = vectorized_target_function(X_test[0][i], X_test[1][i])
 
-    # Train the DNN
-    params = generate_params(False)
-    params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
-                         params['b2'], params['b3']))
+    training_rates_res = pd.DataFrame()
 
-    find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test)
+    sgd_tr_res = find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test)
+
+    training_rates_res = pd.concat([training_rates_res, sgd_tr_res])
+
+    print("checkpoint")
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

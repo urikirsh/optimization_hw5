@@ -3,6 +3,7 @@ import numpy as np
 import unittest
 import numpy.testing as npt
 import matplotlib.pyplot as plt
+import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D  # necessary despite Pycharm thinking otherwise
 
 
@@ -293,15 +294,23 @@ def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, 
     init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
     decay_rates = np.logspace(0, -7, 8, endpoint=True)
     params = get_xavier_params()
+    results = pd.DataFrame()
 
     for init in init_learning_rates:
         for decay in decay_rates:
             learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
                                                   init, decay_rate=decay)
-            final_error = f_history[-1][0][0]
+            train_error = f_history[-1][0][0]
             print("Using", alg_name, "with initial learning rate", init,
                   "and learning decay rate", decay, "on training set, loss is",
-                  final_error)
+                  train_error)
+            curr_res = pd.DataFrame.from_dict({"Algorithm": [alg_name],
+                                               "Data set": ['train'],
+                                               "Initial learning rate": [init],
+                                               "Learning decay rate": [decay],
+                                               "Loss": [train_error]})
+            pd.concat([results, curr_res])
+    print('checkpoint')
     #TODO: test set
 
 

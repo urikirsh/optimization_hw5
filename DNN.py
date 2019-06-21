@@ -245,6 +245,40 @@ def SGD(train_data, train_targets, params, learning_rate: float, num_epochs = 10
     return params, error_history
 
 
+def AdaGrad(train_data, train_targets, params, learning_rate: float, num_epochs = 1000,
+        batch_size=32):
+    idx = np.random.randint(len(train_data), size=batch_size)
+    batch_data = train_data[:, idx]
+    batch_data = np.transpose(batch_data)
+    batch_targets = train_targets[idx]
+
+    error_history = []
+
+    grad_squared = 0
+
+    for epoch in range(num_epochs):
+        batch_grads = []
+        batch_errors = []
+
+        for i in range(batch_size):
+            curr_error, curr_gradient = \
+                target_function(batch_data[i], batch_targets[i], params)
+
+            batch_grads.append(curr_gradient)
+            batch_errors.append(curr_error)
+
+        mean_err = np.mean(batch_errors, axis=0)
+        error_history.append(mean_err)
+
+        mean_grad = np.mean(batch_grads, axis=0)
+        sq_sum = np.sum(np.square(mean_grad))
+        assert sq_sum >= 0
+        grad_squared += sq_sum
+        params -= learning_rate * mean_grad / (np.sqrt(grad_squared) + 1e-7)
+
+    return params, error_history
+
+
 def main():
     # plot the target function
     line = np.arange(-2, 2, .2)
@@ -282,9 +316,8 @@ def main():
     params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
                          params['b2'], params['b3']))
 
-    learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
-
-    # learned_params, f_history = BFGS.BFGS(get_target_f_of_params(X_train, Y_train), params)
+    # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
+    learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)
 
     # Plotting error graph
     f_history = [f_history[i][0][0] for i in range(0, len(f_history))]

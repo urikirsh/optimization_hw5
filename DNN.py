@@ -24,7 +24,10 @@ def phi_g(x: np.ndarray):
     '''
     Returns gradient of phi at vector x. A diagonal matrix
     '''
-    g_i_i = 1 / (np.cosh(x)**2)
+    try:
+        g_i_i = 1 / (np.cosh(x)**2)
+    except FloatingPointError:
+        g_i_i = np.zeros(x.shape)
     return np.diag(np.ravel(g_i_i))
 
 
@@ -204,10 +207,8 @@ def dnn_error_ang_grad(x: np.ndarray, y, parameters):
                      pack_params((grad_W1, grad_W2, grad_W3, grad_b1, grad_b2, grad_b3))))
 
 
-def target_function(X, Y, parameters):  # useless?
-    error_sum = dnn_error_ang_grad(X.T, Y, parameters)[0]
-    gradient = dnn_error_ang_grad(X.T, Y, parameters)[1]
-    return error_sum, gradient
+def target_function(X, Y, parameters):
+    return dnn_error_ang_grad(X.T, Y, parameters)
 
 
 def get_target_f_of_params(X, Y):
@@ -218,8 +219,15 @@ New code starts here
 '''
 
 
+def get_xavier_params():
+    params = generate_params(False)
+    params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
+                         params['b2'], params['b3']))
+    return params
+
+
 def SGD(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
-        num_epochs=1000, batch_size=32):
+        num_epochs=100, batch_size=32):
     idx = np.random.randint(len(train_data), size=batch_size)
     batch_data = train_data[:, idx]
     batch_data = np.transpose(batch_data)
@@ -247,7 +255,7 @@ def SGD(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
 
 
 def AdaGrad(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
-            num_epochs=1000, batch_size=32):
+            num_epochs=100, batch_size=32):
     idx = np.random.randint(len(train_data), size=batch_size)
     batch_data = train_data[:, idx]
     batch_data = np.transpose(batch_data)
@@ -281,7 +289,24 @@ def AdaGrad(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
     return params, error_history
 
 
+def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test):
+    init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
+    decay_rates = np.logspace(0, -7, 8, endpoint=True)
+    params = get_xavier_params()
+
+    for init in init_learning_rates:
+        for decay in decay_rates:
+            learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
+                                                  init, decay_rate=decay)
+            final_error = f_history[-1][0][0]
+            print("Using", alg_name, "with initial learning rate", init,
+                  "and learning decay rate", decay, "on training set, loss is",
+                  final_error)
+    #TODO: test set
+
+
 def main():
+    np.seterr(all='raise')
     # plot the target function
     line = np.arange(-2, 2, .2)
     X1, X2 = np.meshgrid(line, line)
@@ -318,19 +343,21 @@ def main():
     params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
                          params['b2'], params['b3']))
 
-    learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
+    find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test)
+
+    # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)
 
     # Plotting error graph
-    f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
-    plt.figure(figsize=(8, 7))
-    plt.plot(f_history)
-    plt.semilogy()
-    plt.xlabel('Number of iterations')
-    plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
-    plt.grid()
-    plt.title('SGD of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
-    plt.show()
+    # f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
+    # plt.figure(figsize=(8, 7))
+    # plt.plot(f_history)
+    # plt.semilogy()
+    # plt.xlabel('Number of iterations')
+    # plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
+    # plt.grid()
+    # plt.title('SGD of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
+    # plt.show()
     #
     # W1, W2, W3, b1, b2, b3 = unpack_params(learned_params)
     # param_dict = {'W1': W1, 'W2': W2, 'W3': W3, 'b1': b1, 'b2': b2, 'b3': b3}

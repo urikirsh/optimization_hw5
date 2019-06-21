@@ -297,16 +297,18 @@ def eval_test_set(X_test, Y_test, params):
     return np.mean(losses)
 
 
-def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test):
+def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
+                            params=None):
     init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
     decay_rates = np.logspace(0, -7, 8, endpoint=True)
-    params = get_xavier_params()
+    if params is None:
+        params = get_xavier_params()
     results = pd.DataFrame()
 
     for init in init_learning_rates:
         for decay in decay_rates:
             learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
-                                                  init, decay_rate=decay)
+                                                  init, decay_rate=decay, num_epochs=500)
             train_loss = f_history[-1][0][0]
 
             test_loss = eval_test_set(X_test, Y_test, learned_params)
@@ -314,12 +316,11 @@ def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, 
                   "and learning decay rate", decay, "on training set, loss is",
                   train_loss)
             curr_res = pd.DataFrame.from_dict({"Algorithm": [alg_name],
-                                               "Initial learning rate": [init],
-                                               "Learning decay rate": [decay],
+                                               "Alpha 0": [init],
+                                               "Decay rate": [decay],
                                                "Train loss": [train_loss],
                                                "Test loss": [test_loss]})
             results = pd.concat([results, curr_res])
-    print('checkpoint')
     return results
 
 
@@ -356,13 +357,14 @@ def main():
     for i in range(0, Ntest):
         Y_test[i] = vectorized_target_function(X_test[0][i], X_test[1][i])
 
-    training_rates_res = pd.DataFrame()
+    params = get_xavier_params()
 
-    sgd_tr_res = find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test)
-
-    training_rates_res = pd.concat([training_rates_res, sgd_tr_res])
-
-    print("checkpoint")
+    sgd_tr_res = find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test,
+                                         params=params)
+    sgd_tr_res.to_csv('SGD_TR_losses.csv', index=False)
+    adagrad_tr_res = find_best_learning_rate(SGD, "Adagrad", X_train, Y_train, X_test,
+                                             Y_test, params=params)
+    adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

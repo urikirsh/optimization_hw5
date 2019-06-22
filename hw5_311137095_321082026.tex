@@ -32,11 +32,11 @@ Each test was run on a train set that contains 500 points, like last exercise. W
 
 \csvautotabular{Adagrad_TR_losses.csv}
 
-Both algorithms have very similar results for each test. Adagrad is slightly better, but at an insignificant margin. The best (smallest) test loss is achieved for both algorithms with $\alpha_0 = 0.01$ and a decay constant of $k=0.001$. In SGD the minimal loss is 0.017828073039011887 and in Adagrad it is 0.017895997004666164 - less than a 1\% apart. Both minima are $\sim 1.6\%$ smaller than the second smallest test loss.\\
+Both algorithms have very similar results for every test loss. Adagrad is slightly better, but at an insignificant margin. The best (smallest) test loss is achieved for both algorithms with $\alpha_0 = 0.1$ and a decay constant of $k=10^{-5}$. In SGD the minimal test loss is 0.012546461 and in Adagrad it is 0.017895997004666164 - less than a 1\% apart. Both minima are $\sim 1.6\%$ smaller than the second smallest test loss.\\
 
-The train loss is unsurprisingly lower for all parameter values. In many instances it is lower by several orders of magnitude, but not always. The minimum train loss is achieved at $\alpha_0=0.1$ and $k=10^{-7}$ for both algorithms. The minimal training loss is 7.9176597493986e-34 with SGD and 9.086101134115954e-34 with Adagrad. It is the smallest by a significant margin. The minimal test loss is 32 orders of magnitude greater than that number. However, if we look at the test loss achieved in $\alpha_0=0.1$ and $k=10^{-7}$ we see that it is ~2.2\% larger than the minimal test loss. As the test loss is the metric we truly care about, we will continue with the parameters that minimize it.\\
+The train loss is unsurprisingly lower for most parameter values. In many instances it is lower by several orders of magnitude, but not always. The minimum train loss is achieved at $\alpha_0=0.1$ and $k=10^{-6}$ for SGD and is 0.008323657. With Adagrad the minimal train loss is 0.010536475 and is achieved when $\alpha_0 = 0.01$ and $k=0.001$. As the test loss is the metric we truly care about, we will continue with the parameters that minimize it.\\
 
-We will now concentrate our effort at the parameter values where $0.001 \leq \alpha_0 \leq 0.1$ and $10^{-4} \leq k \leq 0.01$.
+We note that the maximum is in an almost flat area in regards to the decay rate. We will now concentrate our effort at the parameter values where $0.01 \leq \alpha_0 \leq 0.5$ and $k = 10^{-6}$.
 
 \subsection{Linear Search}
 The tests on this part were conducted on a fresh set of parameters. We checked the following values of parameters:

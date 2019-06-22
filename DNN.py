@@ -229,9 +229,10 @@ def get_xavier_params():
 
 def SGD(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
         num_epochs=100, batch_size=32, shuffle=False):
-    error_history = []
     train_data = np.copy(org_train_data)
     train_data = np.transpose(train_data)
+
+    error_history = []
 
     for epoch in range(num_epochs):
 
@@ -271,8 +272,10 @@ def SGD(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
     return params, error_history
 
 
-def AdaGrad(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
+def AdaGrad(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
             num_epochs=100, batch_size=32, shuffle=False):
+    train_data = np.copy(org_train_data)
+    train_data = np.transpose(train_data)
 
     error_history = []
     grad_squared = 0
@@ -280,9 +283,16 @@ def AdaGrad(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
     for epoch in range(num_epochs):
         if not shuffle:
             idx = np.random.randint(len(train_data), size=batch_size)
-            batch_data = train_data[:, idx]
-            batch_data = np.transpose(batch_data)
+            batch_data = train_data[idx]
             batch_targets = train_targets[idx]
+        else:
+            merged_data = np.concatenate((train_data, train_targets), axis=1)
+            np.random.shuffle(merged_data)
+            train_data = merged_data[:, 0:2]
+            train_targets = merged_data[:, 2]
+            train_targets = train_targets.reshape(-1, 1)
+            batch_data = train_data[:batch_size]
+            batch_targets = train_targets[:batch_size]
 
         batch_grads = []
         batch_errors = []
@@ -455,22 +465,22 @@ def main():
     # batch_size_results.to_csv('Batch_sizes.csv')
 
     opt_batch = 16
-    learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
-                                    decay_rate=opt_decay, num_epochs=1000,
-                                    batch_size=opt_batch)
-    train_loss = f_history[-1][0][0]
-    test_loss = eval_test_set(X_test, Y_test, learned_params)
-    print("SGD with optimal parameters, with random draw has a training loss of",
-          train_loss, "and test loss of", test_loss)
-
-    learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
-                                    decay_rate=opt_decay, num_epochs=1000,
-                                    batch_size=opt_batch, shuffle=True)
-    train_loss = f_history[-1][0][0]
-    test_loss = eval_test_set(X_test, Y_test, learned_params)
-    print("SGD with optimal parameters, with random draw has a training loss of",
-          train_loss, "and test loss of", test_loss)
-
+    # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
+    #                                 decay_rate=opt_decay, num_epochs=1000,
+    #                                 batch_size=opt_batch)
+    # train_loss = f_history[-1][0][0]
+    # test_loss = eval_test_set(X_test, Y_test, learned_params)
+    # print("SGD with optimal parameters, with random draw has a training loss of",
+    #       train_loss, "and test loss of", test_loss)
+    #
+    # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
+    #                                 decay_rate=opt_decay, num_epochs=1000,
+    #                                 batch_size=opt_batch, shuffle=True)
+    # train_loss = f_history[-1][0][0]
+    # test_loss = eval_test_set(X_test, Y_test, learned_params)
+    # print("SGD with optimal parameters, with random draw has a training loss of",
+    #       train_loss, "and test loss of", test_loss)
+    #
     # learned_params, f_history = AdaGrad(X_train, Y_train, np.copy(params), opt_alpha_0,
     #                                     decay_rate=opt_decay, num_epochs=1000,
     #                                     batch_size=opt_batch)
@@ -487,6 +497,7 @@ def main():
     # print("Adagrad with optimal parameters, with random draw has a training loss of",
     #       train_loss, "and test loss of", test_loss)
 
+    opt_shuffle = False
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

@@ -343,6 +343,33 @@ def lin_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test,
                                   params, init_learning_rates, decay_rates)
 
 
+def search_batch_size(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
+                      params, alpha_0, decay_rate):
+    max_power_of_two = int(math.log(len(X_train[0]), 2))
+    powers_of_two = np.logspace(4, max_power_of_two, (max_power_of_two - 4 + 1), base=2,
+                                endpoint=True)
+    batch_sizes = np.concatenate((powers_of_two, [len(X_train[0])]))
+
+    results = pd.DataFrame()
+
+    for batch in batch_sizes:
+        batch = int(batch)
+        learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
+                                              alpha_0, decay_rate=decay_rate,
+                                              num_epochs=500, batch_size=batch)
+        train_loss = f_history[-1][0][0]
+
+        test_loss = eval_test_set(X_test, Y_test, learned_params)
+        print("Using", alg_name, "with batch size", batch, ", training loss is",
+              train_loss, "\ttest loss is", test_loss)
+        curr_res = pd.DataFrame.from_dict({"Algorithm": [alg_name],
+                                           "Batch size": [batch],
+                                           "Train loss": [train_loss],
+                                           "Test loss": [test_loss]})
+        results = pd.concat([results, curr_res])
+    return results
+
+
 def main():
     np.seterr(all='raise')
     # plot the target function
@@ -385,14 +412,19 @@ def main():
     #                                           Y_test, params=params)
     # adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
 
-    sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
-                                          params)
-    sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
+    # sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+    #                                       params)
+    # sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
+    #
+    # adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
+    #                                           Y_test, params)
+    # adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
 
-    adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
-                                              Y_test, params)
-    adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
+    decay_rate = 1e-4
+    alpha_0 = 9e-4
 
+    search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test, params, alpha_0,
+                      decay_rate)
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

@@ -69,12 +69,10 @@ All those tests were run with a different parameter initialization than tests on
 
 \csvautotabular{Batch_sizes.csv}\\\\
 
-The first thing we note is that all test losses are incredibly close - the batch size has little to no effect on the training loss, in both algorithms.\\
-For SGD, the minimal test loss is 0.026045487, for a batch size of 16. The minimal training loss is 9.40E-36 for a batch size of 64.\\
-For Adagrad, the minimal test loss is 0.026042683, for a batch size of 16. The minimal training loss is 3.50E-27 for a batch size of 256.\\
-Overall we see that the minimal test loss is nearly identical in both algorithms, and is achieved with the same batch size of 16. This also happens to be the smallest, therefore quickest batch size to compute.\\
-We can also notice that while the test losses are incredibly close, the train losses are far smaller in SGD. This could have been a red flag for overfitting, if not for the identical results in test loss between the two algorithms.\\
-\textbf{Conclusion - the chosen batch size is 16.}
+For SGD, the minimal test loss is 0.013080873522129466, for a batch size of 500 (the entire data set). The minimal training loss is 0.010383260939523572 for a batch size of 32.\\
+For Adagrad, the minimal test loss is 0.0029901157137649493, for a batch size of 16. The minimal training loss is 0.0031247137395546444  for a batch size of 500.\\
+Both algorithms achieve the minima for the test losses with the same choice - the entire set. They are still highly linked. Notice that while for most batch choices the difference in performance on the test set between the algorithms is small, the global minimum of Adagrad is ~75\% smaller than that of SGD. The results are similar if we look at the train set\\
+\textbf{Conclusion - the chosen batch size is 500.}
 
 \section{Shuffling the data}
 HERE WE WILL DISCUSS

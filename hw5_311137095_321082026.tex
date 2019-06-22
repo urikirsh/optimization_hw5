@@ -41,24 +41,27 @@ We note that the maximum is in an almost flat area in regards to the decay rate.
 \subsection{Linear Search}
 The tests on this part were conducted on a fresh set of parameters. We checked the following values of parameters:
 \begin{itemize}
-\item $\alpha_0$ = 0.001, 0.002, 0.003 ... 0.009, 0.01, 0.02, 0.03 ... 0.1
-\item k = $10^{-4}$, $2 \cdot 10^{-4}$, $3 \cdot 10^{-4}$ ... $9 \cdot 10^{-4}$, $10^{-3}$, $2 \cdot 10^{-3}$, $3 \cdot 10^{-3}$ ... $10^{-2}$
+\item $\alpha_0$ = 0.01, 0.02, 0.03 ... 0.1, 0.2, 0.3 ... 0.5
+\item k = $10^{-6}$
 \end{itemize}
 
-Because 400 tests were conducted, the results are attached in a separate csv file.\\\\
+\csvautotabular{SGD_fine_TR_losses.csv}
+
+\csvautotabular{Adagrad_fine_TR_losses.csv}\\\\
+
 \textbf{SGD results:}
 \begin{itemize}
-\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.03$ and $k=10^{-4}$. The minimal test loss is 0.018975106.
-\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.04$ and $k=10^{-4}$. The minimal train loss is 1.47E-19
-. Notice it shares the same k and has a very close $\alpha_0$ to the minimal test loss point.
+\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.3$. The minimal test loss is 0.002861623.
+\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.3$ as well. The minimal train loss is 0.002386384.
 \end{itemize}
 
 \textbf{Adagrad results:}
 \begin{itemize}
-\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.1$ and $k=8\cdot 10^{-4}$. The minimal test loss is 0.019047919. This is very close to the minimal test loss of SGD.
-\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.1$ and $k=10^{-4}$. The minimal train loss is 1.18407E-15. This is 4 orders of magnitude larger than the minimal tran loss of SGD.
+\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.5$. The minimal test loss is 0.003210535.
+\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.4$. The minimal train loss is 0.003427235. Note that the two maxima are close to each other in the $\alpha_0$ parameter.
 \end{itemize}
-Because the the two losses in the SGD algorithm are highly linked suggesting a more stable result, and because both losses are smaller in the SGD algorithm, we will proceed with the optimal parameters of the SGD algorithm in terms of test loss.
+Here we see that SGD gets smaller test losses than Adagrad consistently. The margin however is not big and the two algorithm exhibit similar behaviour - their losses increase and decrease together.\\
+We chose to continue with the minima of SGD for two main reasons. First, in SGD the train loss and test loss minima coincide, indicating a more stable result. Second, the losses in the SGD function are lower, meaning it is likely to be the algorithm of choice so it makes more sense to maximize it.
 
 \section{Finding optimal batch size}
 Batch sizes are usually chosen to be powers of 2. Usually the minimum batch size considered is 32. We decided to do a more exhaustive search and start from 16. We also test what happens if the batch size is our entire set - 500 points.\\

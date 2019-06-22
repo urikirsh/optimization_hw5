@@ -459,25 +459,25 @@ def main():
     #                                           Y_test, params=params)
     # adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
 
-    sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
-                                          params)
-    sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
-
-    adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
-                                              Y_test, params)
-    adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
-
-    # opt_alpha_0 = 0.03
-    # opt_decay = 1e-4
-
-    # batch_size_res_sgd = search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
-    #                                        params, opt_alpha_0, opt_decay)
-    # batch_size_res_adagrad = search_batch_size(AdaGrad, 'Adagrad', X_train, Y_train,
-    #                                            X_test, Y_test, params, opt_alpha_0,
-    #                                            opt_decay)
-    # batch_size_results = pd.concat([batch_size_res_sgd, batch_size_res_adagrad])
+    # sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+    #                                       params)
+    # sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
     #
-    # batch_size_results.to_csv('Batch_sizes.csv')
+    # adagrad_tr_res = lin_search_learning_rate(Adagrad, 'Adagrad', X_train, Y_train, X_test,
+    #                                           Y_test, params)
+    # adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
+
+    opt_alpha_0 = 0.3
+    opt_decay = 1e-6
+
+    batch_size_res_sgd = search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+                                           params, opt_alpha_0, opt_decay)
+    batch_size_res_adagrad = search_batch_size(Adagrad, 'Adagrad', X_train, Y_train,
+                                               X_test, Y_test, params, opt_alpha_0,
+                                               opt_decay)
+    batch_size_results = pd.concat([batch_size_res_sgd, batch_size_res_adagrad])
+
+    batch_size_results.to_csv('Batch_sizes.csv')
 
     # opt_batch = 16
     # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
@@ -496,7 +496,7 @@ def main():
     # print("SGD with optimal parameters, with random draw has a training loss of",
     #       train_loss, "and test loss of", test_loss)
     #
-    # learned_params, f_history = AdaGrad(X_train, Y_train, np.copy(params), opt_alpha_0,
+    # learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
     #                                     decay_rate=opt_decay, num_epochs=1000,
     #                                     batch_size=opt_batch)
     # train_loss = f_history[-1][0][0]
@@ -504,7 +504,7 @@ def main():
     # print("Adagrad with optimal parameters, with random draw has a training loss of",
     #       train_loss, "and test loss of", test_loss)
     #
-    # learned_params, f_history = AdaGrad(X_train, Y_train, np.copy(params), opt_alpha_0,
+    # learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
     #                                     decay_rate=opt_decay, num_epochs=1000,
     #                                     batch_size=opt_batch, shuffle=True)
     # train_loss = f_history[-1][0][0]

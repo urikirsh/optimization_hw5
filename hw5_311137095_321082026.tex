@@ -1,6 +1,10 @@
 \documentclass[12pt]{scrartcl}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{float}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+
+\usepackage{csvsimple}
 
 \begin{document}
 
@@ -14,6 +18,22 @@
 \date{\today}
 \maketitle
 
- %end of title section
+%end of title section
+
+\section{Finding optimal learning rate}
+
+In order to optimize the initial training rate (noted below as Alpha 0) and decay constant k, we ran the network on different values of those parameters in a log scale search. The learning rate scale runs from 0.1 to $10^-6$, while the decay constant runs from 1 (no decay) to $10^-7$. We used the following sources as a reference:\\
+\url{https://machinelearningmastery.com/learning-rate-for-deep-learning-neural-networks/}\\
+\url{https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1}\\
+We tested the different values on both the Stochastic Gradient Descent and Adagrad algorithms. In all the tests below we have used the same weights, which were generated vie the Xavier initialization method. In all tests below batch size was 32.\\
+Each test was run on a train set that contains 500 points, like last exercise. We ran the optimization algorithms for 500 epochs each, as we saw the convergence happens before than anyway. See the discussion on the course's Google group on the matter. After that we used the obtained weights and biases, fed them to the network and checked the loss on the test set. The test set consists of 200 points. The training and test sets were created in an identical way.
+
+\csvautotabular{SGD_TR_losses.csv}
+
+\csvautotabular{Adagrad_TR_losses.csv}
+
+Both algorithms have very similar results for each test. Adagrad is slightly better, but at an insignificant, hard to even see margin. The best (smallest) test loss is achieved for both algorithms with $\alpha_0 = 0.0001$ and a decay constant of $k=0.01$. In SGD the minimal loss is 0.025962 and in Adagrad it is exactly the same the precision of 18 decimal digits.\\
+The train loss is surprisingly higher for many parameter vlues. The minimum is achieved at $\alpha_0=0.1$ and $k=10^-7$ for both algorithms. The minimal training loss is 0.0004973 with SGD and 0.000497 with Adagrad. The minimal test loss is over 52 times higher than that number. However, if we look at the test loss achieved in $\alpha_0=0.1$ and $k=10^-7$ we see that it is over three times larger than the minimal test loss. As the test loss is the metric we truly care about, we will continue with the parameters that minimize it.\\
+We see the minimum test loss is achieved in a flat region of k - if we increase or decrease k tenfold, the loss changes by less than 1\%. If we look at $\alpha_0$, the result for $\alpha_0=10^-5$ is greater in less than one percent from the minimum. However, for $\alpha=0.001$ we get a result that is greater by 44\%. We need to explore further values of $10^-5 < \alpha_0 < 10^-3$, to see if a significantly better maximum is achieved there.
 
 \end{document}

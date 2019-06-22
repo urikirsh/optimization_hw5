@@ -54,6 +54,13 @@ Because 400 tests were conducted, the results are attached in a separate csv fil
 . Notice it shares the same k and has a very close $\alpha_0$ to the minimal test loss point.
 \end{itemize}
 
+\textbf{Adagrad results:}
+\begin{itemize}
+\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.1$ and $k=8\cdot 10^{-4}$. The minimal test loss is 0.019047919. This is very close to the minimal test loss of SGD.
+\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.1$ and $k=10^{-4}$. The minimal train loss is 1.18407E-15. This is 4 orders of magnitude larger than the minimal tran loss of SGD.
+\end{itemize}
+Because the the two losses in the SGD algorithm are highly linked suggesting a more stable result, and because both losses are smaller in the SGD algorithm, we will proceed with the optimal parameters of the SGD algorithm.
+
 \section{Finding optimal batch size}
 
 \section{Shuffling the data}

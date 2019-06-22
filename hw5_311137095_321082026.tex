@@ -23,9 +23,8 @@
 
 \section{Finding optimal learning rate}
 \subsection{Log scale search}
-In order to optimize the initial training rate (noted below as Alpha 0) and decay constant k, we ran the network on different values of those parameters in a log scale search. The learning rate scale runs from 0.1 to $10^-6$, while the decay constant runs from 1 (no decay) to $10^-7$. We used the following sources as a reference:\\
-\url{https://machinelearningmastery.com/learning-rate-for-deep-learning-neural-networks/}\\
-\url{https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1}\\
+In order to optimize the initial training rate (noted below as Alpha 0) and decay constant k, we ran the network on different values of those parameters in a log scale search. The learning rate scale runs from 0.1 to $10^-6$, while the decay constant runs from 1 (no decay) to $10^-7$.\\
+
 We tested the different values on both the Stochastic Gradient Descent and Adagrad algorithms. In all the tests below we have used the same weights, which were generated vie the Xavier initialization method. In all tests below batch size was 32.\\
 Each test was run on a train set that contains 500 points, like last exercise. We ran the optimization algorithms for 1000 epochs each. After that we used the obtained weights and biases, fed them to the network and checked the loss on the test set. The test set consists of 200 points. The training and test sets were created in an identical way.
 
@@ -59,10 +58,30 @@ Because 400 tests were conducted, the results are attached in a separate csv fil
 \item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.1$ and $k=8\cdot 10^{-4}$. The minimal test loss is 0.019047919. This is very close to the minimal test loss of SGD.
 \item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.1$ and $k=10^{-4}$. The minimal train loss is 1.18407E-15. This is 4 orders of magnitude larger than the minimal tran loss of SGD.
 \end{itemize}
-Because the the two losses in the SGD algorithm are highly linked suggesting a more stable result, and because both losses are smaller in the SGD algorithm, we will proceed with the optimal parameters of the SGD algorithm.
+Because the the two losses in the SGD algorithm are highly linked suggesting a more stable result, and because both losses are smaller in the SGD algorithm, we will proceed with the optimal parameters of the SGD algorithm in terms of test loss.
 
 \section{Finding optimal batch size}
+Batch sizes are usually chosen to be powers of 2. Usually the minimum batch size considered is 32. We decided to do a more exhaustive search and start from 16. We also test what happens if the batch size is our entire set - 500 points.\\
+All those tests were run with a different parameter initialization than tests on previous parts.
+
+\csvautotabular{Batch_sizes.csv}\\\\
+
+The first thing we note is that all test losses are incredibly close - the batch size has little to no effect on the training loss, in both algorithms.\\
+For SGD, the minimal test loss is 0.026045487, for a batch size of 16. The minimal training loss is 9.40E-36 for a batch size of 64.\\
+For Adagrad, the minimal test loss is 0.026042683, for a batch size of 16. The minimal training loss is 3.50E-27 for a batch size of 256.\\
+Overall we see that the minimal test loss is nearly identical in both algorithms, and is achieved with the same batch size of 16. This also happens to be the smallest, therefore quickest batch size to compute.\\
+We can also notice that while the test losses are incredibly close, the train losses are far smaller in SGD. This could have been a red flag for overfitting, if not for the identical results in test loss between the two algorithms.\\
+\textbf{Conclusion - the chosen batch size is 16.}
 
 \section{Shuffling the data}
+
+\section{References}
+\begin{itemize}
+\item Log scale search - \url{https://machinelearningmastery.com/learning-rate-for-deep-learning-neural-networks/}
+
+\item Log scale search - \url{https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1}
+
+\item Finding optimal batch size - \url{https://stats.stackexchange.com/questions/164876/tradeoff-batch-size-vs-number-of-iterations-to-train-a-neural-network}
+\end{itemize}
 
 \end{document}

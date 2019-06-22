@@ -248,8 +248,11 @@ def SGD(train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
         error_history.append(mean_err)
 
         mean_grad = np.mean(batch_grads, axis=0)
-        learning_rate = alpha_0 * math.exp(-epoch * decay_rate)
-        params -= learning_rate * mean_grad
+        try:
+            learning_rate = alpha_0 * math.exp(-epoch * decay_rate)
+            params -= learning_rate * mean_grad
+        except FloatingPointError:  # Underflow - the change in parameters is too small
+            return params, error_history
 
     return params, error_history
 
@@ -304,7 +307,7 @@ def __search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y
     for init in alphas:
         for decay in decay_rates:
             learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
-                                                  init, decay_rate=decay, num_epochs=500)
+                                                  init, decay_rate=decay, num_epochs=900)
             train_loss = f_history[-1][0][0]
 
             test_loss = eval_test_set(X_test, Y_test, learned_params)
@@ -332,11 +335,15 @@ def log_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test,
 
 def lin_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
                              params=None):
-    part_1 = np.linspace(1e-5, 9e-5, 9, endpoint=True)
-    part_2 = np.linspace(1e-4, 1e-3, 10, endpoint=True)
-    init_learning_rates = np.concatenate((part_1, part_2))
+    alpha_part_1 = np.linspace(1e-3, 9e-3, 9, endpoint=True)
+    alpha_part_2 = np.linspace(1e-2, 1e-1, 10, endpoint=True)
+    init_learning_rates = np.concatenate((alpha_part_1, alpha_part_2))
     init_learning_rates = np.round(init_learning_rates, decimals=10)
-    decay_rates = [1e-3]
+
+    decay_part_1 = np.linspace(1e-4, 9e-4, 9, endpoint=True)
+    decay_part_2 = np.linspace(1e-3, 1e-2, 10, endpoint=True)
+    decay_rates = np.concatenate((decay_part_1, decay_part_2))
+    decay_rates = np.round(decay_rates, decimals=10)
     if params is None:
         params = get_xavier_params()
     return __search_learning_rate(algorithm, alg_name, X_train, Y_train, X_test, Y_test,
@@ -356,7 +363,7 @@ def search_batch_size(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test
         batch = int(batch)
         learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
                                               alpha_0, decay_rate=decay_rate,
-                                              num_epochs=500, batch_size=batch)
+                                              num_epochs=1000, batch_size=batch)
         train_loss = f_history[-1][0][0]
 
         test_loss = eval_test_set(X_test, Y_test, learned_params)
@@ -412,24 +419,24 @@ def main():
     #                                           Y_test, params=params)
     # adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
 
-    # sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
-    #                                       params)
-    # sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
+    sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+                                          params)
+    sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
+
+    adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
+                                              Y_test, params)
+    adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
+
+    # decay_rate = 1e-4
+    # alpha_0 = 9e-4
     #
-    # adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
-    #                                           Y_test, params)
-    # adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
-
-    decay_rate = 1e-4
-    alpha_0 = 9e-4
-
-    batch_size_res_sgd = search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
-                                           params, alpha_0, decay_rate)
-    batch_size_res_adagrad = search_batch_size(AdaGrad, 'Adagrad', X_train, Y_train,
-                                               X_test, Y_test, params, alpha_0, decay_rate)
-    batch_size_results = pd.concat([batch_size_res_sgd, batch_size_res_adagrad])
-
-    batch_size_results.to_csv('Batch_sizes.csv')
+    # batch_size_res_sgd = search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+    #                                        params, alpha_0, decay_rate)
+    # batch_size_res_adagrad = search_batch_size(AdaGrad, 'Adagrad', X_train, Y_train,
+    #                                            X_test, Y_test, params, alpha_0, decay_rate)
+    # batch_size_results = pd.concat([batch_size_res_sgd, batch_size_res_adagrad])
+    #
+    # batch_size_results.to_csv('Batch_sizes.csv')
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

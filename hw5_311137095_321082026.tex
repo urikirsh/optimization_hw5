@@ -75,7 +75,28 @@ Both algorithms achieve the minima for the test losses with the same choice - th
 \textbf{Conclusion - the chosen batch size is 500.}
 
 \section{Shuffling the data}
-HERE WE WILL DISCUSS
+Now that we have all our hyper parameters optimized we check whether shuffling the data improves our results. Up until now we used random draw to select the batch. With shuffling, we also change the order in which we see the samples between each epoch.\\
+Since our optimal batch size was the entire set, not shuffling means simply seeing the same data again and again, while shuffling means seeing each time a different permutation of the data. We expect this to matter, as the learning rate is changing between epochs due to decay. This way we eliminate our bias for earlier samples and we expect the losses to decrease.\\
+Again, for this part we reinitialized the parameters of our neural network.\\
+
+\begin{verbatim}
+SGD with optimal parameters, with random draw has a training loss of 
+0.003075259937012187 and test loss of 0.0034291710115325587
+
+SGD with optimal parameters, with reshuffle has a training loss of 
+0.0035093220388956433 and test loss of 0.0033949180548200606
+
+Adagrad with optimal parameters, with random draw has a training loss of 
+0.001588031372696814 and test loss of 0.0016460816187726292
+
+Adagrad with optimal parameters, with random draw has a training loss of 
+0.0012244947436832116 and test loss of 0.0012998525545179875
+\end{verbatim}
+Reshuffling improves the test loss slightly with SGD, while unsurprisingly increasing the train loss. In Adagrad both losses decrease with shuffling. Adagrad has a test loss that is merely ~36\% of that of SGD, again proving to be the better performing algorithm for this task. Overall shuffling is beneficial.
+
+\section{Comparing convergence}
+Now that we have all the hyper parameters set and we have decided to USE RESHUFFLE, we will have a look at the convergence of both method. Each method was run with the tuned parameters, once on the train set and once on the test set. For the test set, we use a batch size of 200 - the entire set. Again we used a different set of initialized parameters for this part of the exercise.\\
+PLOTS\\
 
 \section{References}
 \begin{itemize}

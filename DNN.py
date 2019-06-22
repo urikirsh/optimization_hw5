@@ -216,11 +216,15 @@ def get_target_f_of_params(X, Y):
     return lambda p: target_function(X=X, Y=Y, parameters=p)
 
 '''
-New code starts here
+New code starts here. All code before originates from the previous exercise.
 '''
 
 
 def get_xavier_params():
+    '''
+    Xavier initialization of the parameters. Generate params was modified to make this
+    happen
+    '''
     params = generate_params(False)
     params = pack_params((params['W1'], params['W2'], params['W3'], params['b1'],
                          params['b2'], params['b3']))
@@ -228,7 +232,13 @@ def get_xavier_params():
 
 
 def SGD(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
-        num_epochs=100, batch_size=32, shuffle=False):
+        num_epochs=1000, batch_size=32, shuffle=False):
+    '''
+    Stochastic Gradient Descent
+    returns the optimized parameters as well as a list
+    containing the L2 loss for each epoch
+    '''
+
     train_data = np.copy(org_train_data)
     train_data = np.transpose(train_data)
 
@@ -274,6 +284,11 @@ def SGD(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
 
 def Adagrad(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
             num_epochs=100, batch_size=32, shuffle=False):
+    '''
+    returns the optimized parameters as well as a list
+    containing the L2 loss for each epoch
+    '''
+
     train_data = np.copy(org_train_data)
     train_data = np.transpose(train_data)
 
@@ -318,6 +333,10 @@ def Adagrad(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.
 
 
 def eval_test_set(X_test, Y_test, params):
+    '''
+    Gets the test set and labels, and optimized parameters. Evaluates the L2 loss over
+    the train set for a DNN with given params and returns it
+    '''
     losses = []
     X_test = np.transpose(X_test)
     for i in range(len(X_test)):
@@ -480,20 +499,20 @@ def main():
     # batch_size_results.to_csv('Batch_sizes.csv')
 
     opt_batch = 500  # Manually selected
-    learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
-                                    decay_rate=opt_decay, num_epochs=1000,
-                                    batch_size=opt_batch)
-    train_loss = f_history[-1][0][0]
-    test_loss = eval_test_set(X_test, Y_test, learned_params)
-    print("SGD with optimal parameters, with random draw has a training loss of",
-          train_loss, "and test loss of", test_loss)
-
+    # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
+    #                                 decay_rate=opt_decay, num_epochs=1000,
+    #                                 batch_size=opt_batch)
+    # train_loss = f_history[-1][0][0]
+    # test_loss = eval_test_set(X_test, Y_test, learned_params)
+    # print("SGD with optimal parameters, with random draw has a training loss of",
+    #       train_loss, "and test loss of", test_loss)
+    #
     # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
     #                                 decay_rate=opt_decay, num_epochs=1000,
     #                                 batch_size=opt_batch, shuffle=True)
     # train_loss = f_history[-1][0][0]
     # test_loss = eval_test_set(X_test, Y_test, learned_params)
-    # print("SGD with optimal parameters, with random draw has a training loss of",
+    # print("SGD with optimal parameters, with reshuffle has a training loss of",
     #       train_loss, "and test loss of", test_loss)
     #
     # learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
@@ -509,30 +528,30 @@ def main():
     #                                     batch_size=opt_batch, shuffle=True)
     # train_loss = f_history[-1][0][0]
     # test_loss = eval_test_set(X_test, Y_test, learned_params)
-    # print("Adagrad with optimal parameters, with random draw has a training loss of",
+    # print("Adagrad with optimal parameters, with reshuffle has a training loss of",
     #       train_loss, "and test loss of", test_loss)
 
-    # opt_shuffle = False
-    #
-    # learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
-    #                                 decay_rate=opt_decay, num_epochs=1000,
-    #                                 batch_size=opt_batch, shuffle=opt_shuffle)
-    # plot_convergence(f_history, 'SGD', 'train')
-    #
-    # learned_params, f_history = SGD(X_test, Y_test, np.copy(params), opt_alpha_0,
-    #                                 decay_rate=opt_decay, num_epochs=1000,
-    #                                 batch_size=opt_batch, shuffle=opt_shuffle)
-    # plot_convergence(f_history, 'SGD', 'test')
-    #
-    # learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
-    #                                     decay_rate=opt_decay, num_epochs=1000,
-    #                                     batch_size=opt_batch, shuffle=opt_shuffle)
-    # plot_convergence(f_history, 'Adagrad', 'train')
-    #
-    # learned_params, f_history = Adagrad(X_test, Y_test, np.copy(params), opt_alpha_0,
-    #                                     decay_rate=opt_decay, num_epochs=1000,
-    #                                     batch_size=opt_batch, shuffle=opt_shuffle)
-    # plot_convergence(f_history, 'Adagrad', 'test')
+    opt_shuffle = True  # Manually selected
+
+    learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
+                                    decay_rate=opt_decay, num_epochs=1000,
+                                    batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'SGD', 'train')
+
+    learned_params, f_history = SGD(X_test, Y_test, np.copy(params), opt_alpha_0,
+                                    decay_rate=opt_decay, num_epochs=1000,
+                                    batch_size=200, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'SGD', 'test')
+
+    learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
+                                        decay_rate=opt_decay, num_epochs=1000,
+                                        batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'Adagrad', 'train')
+
+    learned_params, f_history = Adagrad(X_test, Y_test, np.copy(params), opt_alpha_0,
+                                        decay_rate=opt_decay, num_epochs=1000,
+                                        batch_size=200, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'Adagrad', 'test')
 
     print('success')
 

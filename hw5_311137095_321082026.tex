@@ -46,9 +46,13 @@ The tests on this part were conducted on a fresh set of parameters. We checked t
 \item k = $10^{-4}$, $2 \cdot 10^{-4}$, $3 \cdot 10^{-4}$ ... $9 \cdot 10^{-4}$, $10^{-3}$, $2 \cdot 10^{-3}$, $3 \cdot 10^{-3}$ ... $10^{-2}$
 \end{itemize}
 
-Because 400 tests were conducted, the results are attached in a separate csv file.\\
-
-Again both algorithms are very close. The minimal test loss of the SGD method is at $alpha_0 = 6\cdot 10^{-4}$, with a result of 0.02174814. This also on the point of the minimal train loss of the SGD algorithm. With the Adagrad algorithm, the minima is reached at $\alpha_0 = 9\cdot 10^{-4}$ and is equal to 0.021751412. We need to choose one of the two options. $\alpha_0 = 9\cdot 10^{-4}$ is a local minima of the SGD algorithm while $alpha_0 = 6\cdot 10^{-4}$ is not a local minima of the Adagrad algorithm, so \textbf{we chose $\bm{\alpha_0 = 9\cdot 10^{-4}}$}. Note that the values are fairly close, so this decision should not be critical.
+Because 400 tests were conducted, the results are attached in a separate csv file.\\\\
+\textbf{SGD results:}
+\begin{itemize}
+\item \textit{Minimal test loss} - Achieved for $\alpha_0 = 0.03$ and $k=10^{-4}$. The minimal test loss is 0.018975106.
+\item \textit{Minimal train loss} - Achieved for $\alpha_0 = 0.04$ and $k=10^{-4}$. The minimal train loss is 1.47E-19
+. Notice it shares the same k and has a very close $\alpha_0$ to the minimal test loss point.
+\end{itemize}
 
 \section{Finding optimal batch size}
 

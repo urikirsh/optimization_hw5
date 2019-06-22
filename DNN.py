@@ -297,15 +297,11 @@ def eval_test_set(X_test, Y_test, params):
     return np.mean(losses)
 
 
-def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
-                            params=None):
-    init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
-    decay_rates = np.logspace(0, -7, 8, endpoint=True)
-    if params is None:
-        params = get_xavier_params()
+def __search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
+                             params, alphas: list, decay_rates: list):
     results = pd.DataFrame()
 
-    for init in init_learning_rates:
+    for init in alphas:
         for decay in decay_rates:
             learned_params, f_history = algorithm(X_train, Y_train, np.copy(params),
                                                   init, decay_rate=decay, num_epochs=500)
@@ -322,6 +318,29 @@ def find_best_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, 
                                                "Test loss": [test_loss]})
             results = pd.concat([results, curr_res])
     return results
+
+
+def log_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
+                             params=None):
+    init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
+    decay_rates = np.logspace(0, -7, 8, endpoint=True)
+    if params is None:
+        params = get_xavier_params()
+    return __search_learning_rate(algorithm, alg_name, X_train, Y_train, X_test, Y_test,
+                                  params, init_learning_rates, decay_rates)
+
+
+def lin_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
+                             params=None):
+    part_1 = np.linspace(1e-5, 9e-5, 9, endpoint=True)
+    part_2 = np.linspace(1e-4, 1e-3, 10, endpoint=True)
+    init_learning_rates = np.concatenate((part_1, part_2))
+    init_learning_rates = np.round(init_learning_rates, decimals=10)
+    decay_rates = [1e-3]
+    if params is None:
+        params = get_xavier_params()
+    return __search_learning_rate(algorithm, alg_name, X_train, Y_train, X_test, Y_test,
+                                  params, init_learning_rates, decay_rates)
 
 
 def main():
@@ -359,12 +378,21 @@ def main():
 
     params = get_xavier_params()
 
-    sgd_tr_res = find_best_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test,
-                                         params=params)
-    sgd_tr_res.to_csv('SGD_TR_losses.csv', index=False)
-    adagrad_tr_res = find_best_learning_rate(SGD, "Adagrad", X_train, Y_train, X_test,
-                                             Y_test, params=params)
-    adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
+    # sgd_tr_res = log_search_learning_rate(SGD, "SGD", X_train, Y_train, X_test, Y_test,
+    #                                       params=params)
+    # sgd_tr_res.to_csv('SGD_TR_losses.csv', index=False)
+    # adagrad_tr_res = log_search_learning_rate(SGD, "Adagrad", X_train, Y_train, X_test,
+    #                                           Y_test, params=params)
+    # adagrad_tr_res.to_csv('Adagrad_TR_losses.csv', index=False)
+
+    sgd_tr_res = lin_search_learning_rate(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+                                          params)
+    sgd_tr_res.to_csv('SGD_fine_TR_losses.csv', index=False)
+
+    adagrad_tr_res = lin_search_learning_rate(AdaGrad, 'Adagrad', X_train, Y_train, X_test,
+                                              Y_test, params)
+    adagrad_tr_res.to_csv('Adagrad_fine_TR_losses.csv', index=False)
+
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

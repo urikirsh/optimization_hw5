@@ -423,8 +423,13 @@ def main():
     decay_rate = 1e-4
     alpha_0 = 9e-4
 
-    search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test, params, alpha_0,
-                      decay_rate)
+    batch_size_res_sgd = search_batch_size(SGD, 'SGD', X_train, Y_train, X_test, Y_test,
+                                           params, alpha_0, decay_rate)
+    batch_size_res_adagrad = search_batch_size(AdaGrad, 'Adagrad', X_train, Y_train,
+                                               X_test, Y_test, params, alpha_0, decay_rate)
+    batch_size_results = pd.concat([batch_size_res_sgd, batch_size_res_adagrad])
+
+    batch_size_results.to_csv('Batch_sizes.csv')
 
     # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
     # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)

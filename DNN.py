@@ -369,6 +369,12 @@ def __search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y
 
 def log_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
                              params=None):
+    '''
+    implements double log scale grid search for the two learning rate parameters:
+        - initial learning rate
+        - decay constant
+    '''
+
     init_learning_rates = np.logspace(-1, -6, 6, endpoint=True)
     decay_rates = np.logspace(0, -7, 8, endpoint=True)
     if params is None:
@@ -379,16 +385,17 @@ def log_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test,
 
 def lin_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
                              params=None):
+    '''
+    used for optimizing the initial learning rate parameter, after doing log scale search
+    '''
+
+    # Values below were decided manually after seeing the results of log scale search
     alpha_part_1 = np.linspace(1e-2, 9e-2, 9, endpoint=True)
     alpha_part_2 = np.linspace(1e-1, 5e-1, 5, endpoint=True)
     init_learning_rates = np.concatenate((alpha_part_1, alpha_part_2))
     init_learning_rates = np.round(init_learning_rates, decimals=10)
 
-    # decay_part_1 = np.linspace(1e-4, 9e-4, 9, endpoint=True)
-    # decay_part_2 = np.linspace(1e-3, 1e-2, 10, endpoint=True)
-    # decay_rates = np.concatenate((decay_part_1, decay_part_2))
-    # decay_rates = np.round(decay_rates, decimals=10)
-    decay_rates = [1e-6]
+    decay_rates = [1e-6]    # Found manually by log scale search
     if params is None:
         params = get_xavier_params()
     return __search_learning_rate(algorithm, alg_name, X_train, Y_train, X_test, Y_test,
@@ -397,6 +404,9 @@ def lin_search_learning_rate(algorithm, alg_name: str, X_train, Y_train, X_test,
 
 def search_batch_size(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test,
                       params, alpha_0, decay_rate):
+    '''
+    used for optimizing the batch size parameter
+    '''
     max_power_of_two = int(math.log(len(X_train[0]), 2))
     powers_of_two = np.logspace(4, max_power_of_two, (max_power_of_two - 4 + 1), base=2,
                                 endpoint=True)

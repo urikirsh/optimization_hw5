@@ -94,9 +94,35 @@ Adagrad with optimal parameters, with random draw has a training loss of
 \end{verbatim}
 Reshuffling improves the test loss slightly with SGD, while unsurprisingly increasing the train loss. In Adagrad both losses decrease with shuffling. Adagrad has a test loss that is merely ~36\% of that of SGD, again proving to be the better performing algorithm for this task. Overall shuffling is beneficial.
 
-\section{Comparing convergence}
+\section{Convergence}
 Now that we have all the hyper parameters set and we have decided to USE RESHUFFLE, we will have a look at the convergence of both method. Each method was run with the tuned parameters, once on the train set and once on the test set. For the test set, we use a batch size of 200 - the entire set. Again we used a different set of initialized parameters for this part of the exercise.\\
-PLOTS\\
+
+\begin{figure}[H]
+	\hfill\includegraphics{SGD_train_convergence.jpg}\hspace*{\fill}
+	\caption{Loss of train set as a function of epoch for the SGD algorithm}
+\end{figure}
+
+\begin{figure}[H]
+	\hfill\includegraphics{SGD_test_convergence.jpg}\hspace*{\fill}
+	\caption{Loss of test set as a function of epoch for the SGD algorithm}
+\end{figure}
+
+As a sanity check, indeed all algorithms and sets starts with roughly the same loss. Both SGD graphs converge very quickly in the beginning then slow down considerably, before gradually increasing the slope again. The train an test graphs for SGD have the same pot shape, but the test error is lower - this can probably be attributed to the smaller size of the test set.\\
+
+\begin{figure}[H]
+	\hfill\includegraphics{Adagrad_train_convergence.jpg}\hspace*{\fill}
+	\caption{Loss of train set as a function of epoch for the Adagrad algorithm}
+\end{figure}
+
+\begin{figure}[H]
+	\hfill\includegraphics{Adagrad_test_convergence.jpg}\hspace*{\fill}
+	\caption{Loss of test set as a function of epoch for the Adagrad algorithm}
+\end{figure}
+
+Both Adagrad graphs are similar to each other, and similar to the SGD graphs. There are two notable differences however. The first is a small local peak at around 450 for both sets. The second is the vastly better performance - by an order of magnitude. Adagrad is "stuck" for fewer epochs before picking up speed again.\\
+
+\subsection{Comparison to FBGS}
+The two algorithms are less precise than FBGS. They have higher training losses, they take more epochs to converge, if they at all do; they didn't converge after 100 epochs. However, they are vastly superior in speed.
 
 \section{References}
 \begin{itemize}
@@ -105,6 +131,8 @@ PLOTS\\
 \item Log scale search - \url{https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1}
 
 \item Finding optimal batch size - \url{https://stats.stackexchange.com/questions/164876/tradeoff-batch-size-vs-number-of-iterations-to-train-a-neural-network}
+
+\item Batch size search - \url{https://stats.stackexchange.com/questions/164876/tradeoff-batch-size-vs-number-of-iterations-to-train-a-neural-network}
 \end{itemize}
 
 \end{document}

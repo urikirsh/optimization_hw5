@@ -272,7 +272,7 @@ def SGD(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
     return params, error_history
 
 
-def AdaGrad(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
+def Adagrad(org_train_data, train_targets, params, alpha_0: float, decay_rate=0.5,
             num_epochs=100, batch_size=32, shuffle=False):
     train_data = np.copy(org_train_data)
     train_data = np.transpose(train_data)
@@ -402,6 +402,20 @@ def search_batch_size(algorithm, alg_name: str, X_train, Y_train, X_test, Y_test
     return results
 
 
+def plot_convergence(f_history: list, alg_name: str, data_set: str):
+    # Plotting error graph
+    f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
+    plt.figure(figsize=(8, 7))
+    plt.plot(f_history)
+    plt.semilogy()
+    plt.xlabel('Number of iterations')
+    plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
+    plt.grid()
+    plt.title(alg_name + ' of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$'
+              + ' on ' + data_set + ' set')
+    plt.show()
+
+
 def main():
     np.seterr(all='raise')
     # plot the target function
@@ -499,33 +513,25 @@ def main():
 
     opt_shuffle = False
 
-    # learned_params, f_history = SGD(X_train, Y_train, params, 0.5)
-    # learned_params, f_history = AdaGrad(X_train, Y_train, params, 0.5)
+    learned_params, f_history = SGD(X_train, Y_train, np.copy(params), opt_alpha_0,
+                                    decay_rate=opt_decay, num_epochs=1000,
+                                    batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'SGD', 'train')
 
-    # Plotting error graph
-    # f_history = [f_history[i][0][0] for i in range(0, len(f_history))]
-    # plt.figure(figsize=(8, 7))
-    # plt.plot(f_history)
-    # plt.semilogy()
-    # plt.xlabel('Number of iterations')
-    # plt.ylabel('$|F(x, W_k)-f(x_1, x_2)|^2$')
-    # plt.grid()
-    # plt.title('SGD of DNN trying to approximate $f(x_1, x_2) = x_1*exp(-x_1^2-x_2^2)$')
-    # plt.show()
-    #
-    # W1, W2, W3, b1, b2, b3 = unpack_params(learned_params)
-    # param_dict = {'W1': W1, 'W2': W2, 'W3': W3, 'b1': b1, 'b2': b2, 'b3': b3}
-    # reconstructed = np.array(list(dnn_forward(x.reshape(-1, 1), param_dict)[0][0] for x in X_test.T))
-    #
-    # fig = plt.figure(figsize=(10, 8))
-    # ax = fig.add_subplot(111, projection='3d')
-    # ax.plot_surface(X1, X2, Y, cmap=plt.cm.coolwarm, alpha=.6)
-    # ax.set_xlabel('$x_1$')
-    # ax.set_ylabel('$x_2$')
-    # ax.set_zlabel('$F(x, W)$')
-    # ax.scatter(X_test[:][0], X_test[:][1], reconstructed, c='g', alpha=.61)
-    # plt.title('Predictions of trained DNN')
-    # plt.show()
+    learned_params, f_history = SGD(X_test, Y_test, np.copy(params), opt_alpha_0,
+                                    decay_rate=opt_decay, num_epochs=1000,
+                                    batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'SGD', 'test')
+
+    learned_params, f_history = Adagrad(X_train, Y_train, np.copy(params), opt_alpha_0,
+                                        decay_rate=opt_decay, num_epochs=1000,
+                                        batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'Adagrad', 'train')
+
+    learned_params, f_history = Adagrad(X_test, Y_test, np.copy(params), opt_alpha_0,
+                                        decay_rate=opt_decay, num_epochs=1000,
+                                        batch_size=opt_batch, shuffle=opt_shuffle)
+    plot_convergence(f_history, 'Adagrad', 'test')
 
     print('success')
 
